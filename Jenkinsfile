@@ -22,7 +22,7 @@ pipeline {
     APP_NAME = 'geoip-rest-api'
     NAMESPACE = 'foundation-internal-webdev-apps'
     IMAGE_NAME = 'eclipsefdn/geoip-rest-api'
-    CONTAINER_NAME = 'geoip-rest-api'
+    CONTAINER_NAME = 'app'
     ENVIRONMENT = sh(
       script: """
         if [ "${env.BRANCH_NAME}" = "master" ]; then
@@ -62,7 +62,8 @@ pipeline {
       }
       steps {
         sh '''
-          docker build -f src/main/docker/Dockerfile.jvm --no-cache -t ${IMAGE_NAME}:${TAG_NAME} -t ${IMAGE_NAME}:latest .
+           ./mvnw package  
+           docker build -f src/main/docker/Dockerfile.jvm --no-cache -t ${IMAGE_NAME}:${TAG_NAME} -t ${IMAGE_NAME}:latest .
         '''
       }
     }
