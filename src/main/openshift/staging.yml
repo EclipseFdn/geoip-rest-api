@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: geoip-rest-api
+  namespace: webapps
+spec:
+  selector:
+    matchLabels:
+      app: geoip-rest-api
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: geoip-rest-api
+        environment: staging
+    spec:
+      containers:
+      - name: app
+        image: eclipsefdn/geoip-rest-api:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: '1'
+            memory: 512Mi
+          requests:
+            cpu: 200m
+            memory: 512Mi
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  name: geoip-rest-api
+  namespace: webapps
+spec:
+  ports:
+  - name: "http"
+    port: 80
+    protocol: "TCP"
+    targetPort: 8080
+  selector:
+    app: geoip-rest-api
+    environment: staging
+---
+apiVersion: "route.openshift.io/v1"
+kind: "Route"
+metadata:
+  name: geoip-rest-api
+  namespace: webapps
+  annotations:
+    haproxy.router.openshift.io/timeout: 20s
+spec:
+  host: "api-staging.eclipse.org"
+  path: "/geoip"
+  port:
+    targetPort: "http"
+  tls:
+    insecureEdgeTerminationPolicy: "Redirect"
+    termination: "edge"
+  to:
+    kind: "Service"
+    name: geoip-rest-api
+    weight: 100
