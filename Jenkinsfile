@@ -3,17 +3,60 @@
 pipeline {
   agent {
     kubernetes {
-      label 'kubedeploy-agent'
+      label 'buildpack-agent'
       yaml '''
       apiVersion: v1
       kind: Pod
       spec:
         containers:
-        - name: kubectl
-          image: eclipsefdn/kubectl:1.9-alpine
+        - name: buildpack
+          image: buildpack-deps:stable
           command:
           - cat
           tty: true
+          resources:
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+            requests:
+              memory: "2Gi"
+              cpu: "1"
+          volumeMounts:
+          - name: tmp
+            mountPath: /tmp
+        - name: jnlp
+          resources:
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+            requests:
+              memory: "2Gi"
+              cpu: "1"
+          volumeMounts:
+          - name: mvnw
+            mountPath: /home/jenkins/.m2/wrapper
+            readOnly: false
+          - name: m2-repo
+            mountPath: /home/jenkins/.m2/repository
+          - name: settings-xml
+            mountPath: /home/jenkins/.m2/settings.xml
+            subPath: settings.xml
+            readOnly: true
+          - name: tmp
+            mountPath: /tmp
+        volumes:
+        - name: mvnw
+          emptyDir: {}
+        - name: m2-repo
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: settings-xml
+          secret:
+            secretName: m2-secret-dir
+            items:
+            - key: settings.xml
+              path: settings.xml
       '''
     }
   }
@@ -56,13 +99,23 @@ pipeline {
   }
 
   stages {
+    stage('Build Java code') {
+      steps {
+        container('buildpack') {
+          sh './bin/maxmind.sh /tmp/'
+        }
+        sh './mvnw package'
+          stash includes: 'target/', name: 'target'
+      }
+    }
+
     stage('Build docker image') {
       agent {
         label 'docker-build'
       }
       steps {
+        unstash 'target'
         sh '''
-           ./mvnw package  
            docker build -f src/main/docker/Dockerfile.jvm --no-cache -t ${IMAGE_NAME}:${TAG_NAME} -t ${IMAGE_NAME}:latest .
         '''
       }
@@ -89,6 +142,23 @@ pipeline {
     }
 
     stage('Deploy to cluster') {
+      agent {
+        kubernetes {
+          label 'kubedeploy-agent'
+          yaml '''
+          apiVersion: v1
+          kind: Pod
+          spec:
+            containers:
+            - name: kubectl
+              image: eclipsefdn/kubectl:1.9-alpine
+              command:
+              - cat
+              tty: true
+          '''
+        }
+      }
+
       when {
         anyOf {
           environment name: 'ENVIRONMENT', value: 'production'

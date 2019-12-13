@@ -14,16 +14,32 @@
 # docker run -i --rm -p 8080:8080 quarkus/geoip-client-jvm
 #
 ###
+FROM debian:stable-slim AS maxmind-builder
+
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends \
+  ca-certificates \
+  curl \
+  unzip
+
+COPY bin/maxmind.sh /workdir/
+RUN /workdir/maxmind.sh /tmp/maxmind
+
 FROM fabric8/java-alpine-openjdk8-jre
-# we need the following commands to run script
-RUN apk add wget unzip tar findutils gzip
 
 WORKDIR /deployments/scripts
-COPY bin/maxmind.sh /deployments/scripts
-RUN chmod +x ./maxmind.sh
-RUN ./maxmind.sh /tmp
 
-ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager -Xmx256m"
+COPY --from=maxmind-builder /tmp/maxmind /maxmind
+
+ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 \
+-Djava.util.logging.manager=org.jboss.logmanager.LogManager \
+-Xmx256m \
+-Declipse.subnet.ipv4.path=/maxmind/db/GeoLite2-Country-Blocks-IPv4.csv \
+-Declipse.subnet.ipv6.path=/maxmind/db/GeoLite2-Country-Blocks-IPv6.csv \
+-Declipse.subnet.countries.path=/maxmind/db/GeoLite2-Country-Locations-en.csv \
+-Dmaxmind.database.root=/maxmind/bin \
+-Dmaxmind.database.country.file=GeoLite2-Country.mmdb \
+-Dmaxmind.database.city.file=GeoLite2-City.mmdb"
 ENV AB_ENABLED=jmx_exporter
 COPY target/lib/* /deployments/lib/
 COPY target/*-runner.jar /deployments/app.jar
