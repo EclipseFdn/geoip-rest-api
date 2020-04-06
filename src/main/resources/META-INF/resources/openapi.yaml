@@ -1,0 +1,133 @@
+---
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Eclipse GeoIP REST API
+  description: REST client to retrieve GeoIP information about IP addresses and to lookup IP information for countries given their ISO country code.
+  license:
+    name: Eclipse Public License - 2.0
+    url: https://www.eclipse.org/legal/epl-2.0/
+  
+servers:
+- url: http://api.eclipse.org/geoip
+  description: Production endpoint for Eclipse GeoIP REST API
+paths:
+  /cities/{ipAddr}:
+    description: >
+      Retrieves city data for a given IP address in either IPv4 or IPv6 format. In cases where blacklisted IP's are sent (such as local addresses, or addresses outside of range), a server error is returned.
+    get:
+      summary: Get city
+      parameters:
+      - name: ipAddr
+        in: path
+        required: true
+        description: a valid IP address to retrieve the city of origin for.
+        schema:
+          type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/City"
+        500:
+          description: Server Error
+          
+  /countries/{ipAddr}:
+    description: > 
+      Retrieves country data for a given IP address in either IPv4 or IPv6 format. In cases where blacklisted IP's are sent (such as local addresses, or addresses outside of range), a server error is returned. 
+    get:
+      summary: Get country
+      parameters:
+      - name: ipAddr
+        in: path
+        required: true
+        description: a valid IP address to retrieve the country of origin for.
+        schema:
+          type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                 $ref: "#/components/schemas/Country"
+        500:
+          description: Server Error
+
+  /subnets/{ipv}/{isoCountry}:
+    description: >
+      Given an IP protocol version string (IPv4 or IPv6 currently) and a 2 letter ISO country code, retrieves a list of subnets registered for the given country. If an invalid IP protocol version string is given, or an invalid ISO code is passed, a server error is returned.
+    get:
+      summary: Get IP ranges for country code
+      parameters:
+      - name: ipv
+        in: path
+        required: true
+        description: Which list of subnets to retrieve IP ranges for. 
+        schema:
+          type: string
+          enum: ['ipv4','ipv6']
+      - name: isoCountry
+        in: path
+        required: true
+        description: The 2 letter ISO code for the country to retrieve (case-insensitive).
+        schema:
+          type: string
+          minLength: 2
+          maxLength: 2
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: IP ranges with subnet mask that are from the given country.
+                  example: "192.168.1.0/24"
+        500:
+          description: Server Error
+          
+components:
+  schemas:
+    Country:
+      type: object
+      properties:
+        geoname_id:
+          type: integer
+          description: The MaxMind API unique ID for a geographic location.
+        iso_code:
+          type: string
+          description: The 2 letter ISO code for the current country. 
+        names:
+          type: object
+          description: The locale of the country name.
+          additionalProperties:
+            type: string
+            description: Name of the country in the given locale.
+          example:
+            en: Canada
+            "pt-BR": "Canadá"
+        is_in_european_union:
+          type: boolean
+          description: TRUE if the current country is in the European Union, and false otherwise.
+    City:
+      type: object
+      properties:
+        geoname_id:
+          type: integer
+          description: The MaxMind API unique ID for a geographic location.
+        names:
+          type: object
+          description: The locale of the country name
+          additionalProperties:
+            type: string
+            description: Name of the country in the given locale.
+          example:
+            en: Ottawa
+            "pt-BR": "Otava"
+          
+          
