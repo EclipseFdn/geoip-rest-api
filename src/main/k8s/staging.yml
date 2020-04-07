@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: geoip-rest-api
+  name: geoip-rest-staging-api
   namespace: foundation-internal-webdev-apps
 spec:
   selector:
@@ -32,7 +32,7 @@ spec:
 apiVersion: "v1"
 kind: "Service"
 metadata:
-  name: geoip-rest-api
+  name: geoip-rest-staging-api
   namespace: foundation-internal-webdev-apps
 spec:
   ports:
@@ -47,11 +47,11 @@ spec:
 apiVersion: "route.openshift.io/v1"
 kind: "Route"
 metadata:
-  name: geoip-rest-api
+  name: geoip-rest-staging-api
   namespace: foundation-internal-webdev-apps
   annotations:
     haproxy.router.openshift.io/timeout: 20s
-    haproxy.router.openshift.io/disable_cookies: true
+    haproxy.router.openshift.io/disable_cookies: "true"
     haproxy.router.openshift.io/balance: roundrobin
 spec:
   host: "api-staging.eclipse.org"
@@ -63,5 +63,5 @@ spec:
     termination: "edge"
   to:
     kind: "Service"
-    name: geoip-rest-api
+    name: geoip-rest-staging-api
     weight: 100
