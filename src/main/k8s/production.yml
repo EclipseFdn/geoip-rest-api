@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   name: geoip-rest-api
   namespace: foundation-internal-webdev-apps
+  labels:
+    app: geoip-rest-api
+    environment: production
 spec:
   selector:
     matchLabels:
