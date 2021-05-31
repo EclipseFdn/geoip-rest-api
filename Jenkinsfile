@@ -1,74 +1,6 @@
   @Library('common-shared') _
 
   pipeline {
-    agent {
-      kubernetes {
-        label 'buildpack-agent-' + env.JOB_NAME.replaceAll("/", "-")
-        yaml '''
-        apiVersion: v1
-        kind: Pod
-        spec:
-          containers:
-          - name: buildpack
-            image: buildpack-deps:stable
-            command:
-            - cat
-            tty: true
-            resources:
-              limits:
-                memory: "2Gi"
-                cpu: "1"
-              requests:
-                memory: "2Gi"
-                cpu: "1"
-            env:
-            - name: LICENSE_KEY_FILE
-              value: /run/secrets/maxmind/license_key
-            volumeMounts:
-            - name: tmp
-              mountPath: /tmp
-            - name: maxmind-license-key
-              mountPath: /run/secrets/maxmind/
-              readOnly: true
-          - name: jnlp
-            resources:
-              limits:
-                memory: "2Gi"
-                cpu: "1"
-              requests:
-                memory: "2Gi"
-                cpu: "1"
-            volumeMounts:
-            - name: mvnw
-              mountPath: /home/jenkins/.m2/wrapper
-              readOnly: false
-            - name: m2-repo
-              mountPath: /home/jenkins/.m2/repository
-            - name: settings-xml
-              mountPath: /home/jenkins/.m2/settings.xml
-              subPath: settings.xml
-              readOnly: true
-            - name: tmp
-              mountPath: /tmp
-          volumes:
-          - name: mvnw
-            emptyDir: {}
-          - name: m2-repo
-            emptyDir: {}
-          - name: tmp
-            emptyDir: {}
-          - name: settings-xml
-            secret:
-              secretName: m2-secret-dir
-              items:
-              - key: settings.xml
-                path: settings.xml
-          - name: maxmind-license-key
-            secret:
-              secretName: maxmind-license-key
-        '''
-      }
-    }
 
     environment {
       APP_NAME = 'geoip-rest-api'
@@ -110,9 +42,15 @@
     stages {
       stage('Build Java code') {
         steps {
-          container('buildpack') {
+          readTrusted './bin/maxmind.sh'
+          readTrusted 'mvnw'
+          readTrusted '.mvn/wrapper/MavenWrapperDownloader.java'
+          readTrusted 'pom.xml'
+
+          withCredentials([string(credentialsId: 'maxmind-license-key', variable: 'MAXMIND_LICENSE_KEY')]) {
             sh 'mkdir -p /tmp/maxmind && ./bin/maxmind.sh /tmp/maxmind'
           }
+
           sh './mvnw -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn --batch-mode package'
           stash includes: 'target/', name: 'target'
           dir('/tmp') {
@@ -126,6 +64,8 @@
           label 'docker-build'
         }
         steps {
+          readTrusted 'src/main/docker/Dockerfile.jvm'
+
           unstash 'target'
           unstash 'maxmind'
 
@@ -156,14 +96,14 @@
       stage('Deploy to cluster') {
         agent {
           kubernetes {
-            label 'kubedeploy-agent-' + env.JOB_NAME.replaceAll("/", "-")
+            label 'kubedeploy-agent'
             yaml '''
             apiVersion: v1
             kind: Pod
             spec:
               containers:
               - name: kubectl
-                image: eclipsefdn/kubectl:1.9-alpine
+                image: eclipsefdn/kubectl:okd-c1
                 command:
                 - cat
                 tty: true
@@ -179,23 +119,12 @@
         }
         steps {
           container('kubectl') {
-            withKubeConfig([credentialsId: '1d8095ea-7e9d-4e94-b799-6dadddfdd18a', serverUrl: 'https://console-int.c1-ci.eclipse.org']) {
-              sh '''
-                DEPLOYMENT="$(k8s getFirst deployment "${NAMESPACE}" "app=${APP_NAME},environment=${ENVIRONMENT}")"
-                if [[ $(echo "${DEPLOYMENT}" | jq -r 'length') -eq 0 ]]; then
-                  echo "ERROR: Unable to find a deployment to patch matching 'app=${APP_NAME},environment=${ENVIRONMENT}' in namespace ${NAMESPACE}"
-                  exit 1
-                else 
-                  DEPLOYMENT_NAME="$(echo "${DEPLOYMENT}" | jq -r '.metadata.name')"
-                  kubectl set image "deployment.v1.apps/${DEPLOYMENT_NAME}" -n "${NAMESPACE}" "${CONTAINER_NAME}=${IMAGE_NAME}:${TAG_NAME}" --record=true
-                  if ! kubectl rollout status "deployment.v1.apps/${DEPLOYMENT_NAME}" -n "${NAMESPACE}"; then
-                    # will fail if rollout does not succeed in less than .spec.progressDeadlineSeconds
-                    kubectl rollout undo "deployment.v1.apps/${DEPLOYMENT_NAME}" -n "${NAMESPACE}"
-                    exit 1
-                  fi
-                fi
-              '''
-            }
+            updateContainerImage([
+              namespace: "${env.NAMESPACE}",
+              selector: "app=${env.APP_NAME},environment=${env.ENVIRONMENT}",
+              containerName: "${env.CONTAINER_NAME}",
+              newImageRef: "${env.IMAGE_NAME}:${env.TAG_NAME}"
+            ])
           }
         }
       }

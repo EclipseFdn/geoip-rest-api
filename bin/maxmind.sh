@@ -24,9 +24,8 @@ if [ -z "${1}" ]; then
 fi
 
 ## retrieve license key
-LICENSE_KEY=$(cat ${LICENSE_KEY_FILE:-/run/secrets/license_key})
-if [ -z "$LICENSE_KEY" ]; then
-  echo "Could not find a license key in ${LICENSE_KEY_FILE:-/run/secrets/license_key}"
+if [ -z "${MAXMIND_LICENSE_KEY:-}" ]; then
+  echo "You must export an environment variable MAXMIND_LICENSE_KEY in order to use this script"
   exit 1
 fi
 
@@ -35,9 +34,9 @@ mkdir -p "${1}/db"
 pushd "${1:-"."}" || exit 1
 
 echo "Getting data from MaxMind"
-curl -sSL "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&suffix=tar.gz&license_key=$LICENSE_KEY" | tar zxv -C bin --wildcards '*.mmdb'
-curl -sSL "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&suffix=tar.gz&license_key=$LICENSE_KEY" | tar zxv -C bin --wildcards '*.mmdb'
-curl -sSL "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country-CSV&suffix=zip&license_key=$LICENSE_KEY" -o GeoLite2-Country-CSV.zip
+curl -sSL "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&suffix=tar.gz&license_key=$MAXMIND_LICENSE_KEY" | tar zxv -C bin --wildcards '*.mmdb'
+curl -sSL "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&suffix=tar.gz&license_key=$MAXMIND_LICENSE_KEY" | tar zxv -C bin --wildcards '*.mmdb'
+curl -sSL "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country-CSV&suffix=zip&license_key=$MAXMIND_LICENSE_KEY" -o GeoLite2-Country-CSV.zip
 unzip GeoLite2-Country-CSV.zip
 rm -vf GeoLite2-Country-CSV.zip
 
