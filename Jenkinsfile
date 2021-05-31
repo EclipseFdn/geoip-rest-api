@@ -1,6 +1,7 @@
   @Library('common-shared') _
 
   pipeline {
+    agent any
 
     environment {
       APP_NAME = 'geoip-rest-api'
