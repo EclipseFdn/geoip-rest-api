@@ -121,7 +121,6 @@
         steps {
           container('kubectl') {
             updateContainerImage([
-              credentialsId: "ci-bot-okd-c1-token",
               namespace: "${env.NAMESPACE}",
               selector: "app=${env.APP_NAME},environment=${env.ENVIRONMENT}",
               containerName: "${env.CONTAINER_NAME}",
