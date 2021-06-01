@@ -5,7 +5,7 @@ metadata:
   namespace: foundation-internal-webdev-apps
   labels:
     app: geoip-rest-api
-    environment: production
+    environment: staging
 spec:
   selector:
     matchLabels:
