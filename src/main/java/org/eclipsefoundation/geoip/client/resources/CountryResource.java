@@ -7,18 +7,22 @@
 package org.eclipsefoundation.geoip.client.resources;
 
 import java.io.IOException;
+import java.util.Locale;
+import java.util.MissingResourceException;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipsefoundation.geoip.client.helper.CountryHelper;
 import org.eclipsefoundation.geoip.client.helper.InetAddressHelper;
 import org.eclipsefoundation.geoip.client.model.Error;
 import org.eclipsefoundation.geoip.client.service.GeoIPService;
@@ -57,6 +61,21 @@ public class CountryResource {
 			return Response.ok(c.toJson()).build();
 		} catch (IOException e) {
 			throw new RuntimeException("Error while converting country record to JSON", e);
+		}
+	}
+
+	@GET
+	@Path("/all")
+	public Response getAll(@QueryParam("locale") String locale) {
+		Locale l = new Locale(locale != null ? locale : "en");
+		return Response.ok(CountryHelper.getCountries(isValid(l) ? l : null)).build();
+	}
+
+	private boolean isValid(Locale locale) {
+		try {
+			return locale.getISO3Language() != null && locale.getISO3Country() != null;
+		} catch (MissingResourceException e) {
+			return false;
 		}
 	}
 }

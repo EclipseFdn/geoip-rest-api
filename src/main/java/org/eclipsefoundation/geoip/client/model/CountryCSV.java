@@ -17,13 +17,13 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
  *
  */
 @RegisterForReflection
-public class Country {
+public class CountryCSV {
 	@CsvBindByName(column = "geoname_id")
 	private String id;
 	@CsvBindByName(column = "country_iso_code")
 	private String countryIsoCode;
 
-	public Country() {
+	public CountryCSV() {
 	}
 
 	/**

@@ -20,7 +20,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.eclipsefoundation.geoip.client.model.Country;
+import org.eclipsefoundation.geoip.client.model.CountryCSV;
 import org.eclipsefoundation.geoip.client.model.IPVersion;
 import org.eclipsefoundation.geoip.client.model.SubnetRange;
 import org.eclipsefoundation.geoip.client.service.NetworkService;
@@ -73,9 +73,9 @@ public class CSVNetworkService implements NetworkService {
 	private void loadCountries(String filePath, Map<String, String> container) {
 		try (FileReader reader = new FileReader(filePath)) {
 			// read in all of the country lines as country objects
-			List<Country> countries = new CsvToBeanBuilder<Country>(reader).withType(Country.class).build().parse();
+			List<CountryCSV> countries = new CsvToBeanBuilder<CountryCSV>(reader).withType(CountryCSV.class).build().parse();
 			// add each of the countries to the container map, mapping ID to the ISO code
-			for (Country c : countries) {
+			for (CountryCSV c : countries) {
 				container.put(c.getId(), c.getCountryIsoCode().toLowerCase());
 			}
 		} catch (FileNotFoundException e) {
