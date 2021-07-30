@@ -22,7 +22,7 @@ COPY maxmind/ /maxmind/
 
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 \
 -Djava.util.logging.manager=org.jboss.logmanager.LogManager \
--Xmx256m \
+-Xmx512m \
 -Declipse.subnet.ipv4.path=/maxmind/db/GeoLite2-Country-Blocks-IPv4.csv \
 -Declipse.subnet.ipv6.path=/maxmind/db/GeoLite2-Country-Blocks-IPv6.csv \
 -Declipse.subnet.countries.path=/maxmind/db/GeoLite2-Country-Locations-en.csv \
