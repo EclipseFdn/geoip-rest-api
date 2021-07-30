@@ -54,7 +54,8 @@ public class CSVNetworkService implements NetworkService {
 		this.countryIdToIso = new HashMap<>();
 		loadCountries(countriesFilePath, countryIdToIso);
 		loadMap(ipv4FilePath, ipv4Subnets);
-		loadMap(ipv6FilePath, ipv6Subnets);
+		// Disabled as it is a 2million item list and crashes the app
+		//loadMap(ipv6FilePath, ipv6Subnets);
 	}
 
 	@Override
