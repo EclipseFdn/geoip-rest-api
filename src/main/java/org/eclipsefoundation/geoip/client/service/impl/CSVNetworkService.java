@@ -19,13 +19,15 @@ import java.util.Objects;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 
+import com.opencsv.bean.CsvToBeanBuilder;
+
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipsefoundation.geoip.client.model.Country;
 import org.eclipsefoundation.geoip.client.model.IPVersion;
 import org.eclipsefoundation.geoip.client.model.SubnetRange;
 import org.eclipsefoundation.geoip.client.service.NetworkService;
 
-import com.opencsv.bean.CsvToBeanBuilder;
+import io.quarkus.runtime.Startup;
 
 /**
  * Loads Network subnet information via CSV files on the system.
@@ -33,6 +35,7 @@ import com.opencsv.bean.CsvToBeanBuilder;
  * @author Martin Lowe
  *
  */
+@Startup
 @ApplicationScoped
 public class CSVNetworkService implements NetworkService {
 

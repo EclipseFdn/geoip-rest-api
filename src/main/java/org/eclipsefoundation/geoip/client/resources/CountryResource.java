@@ -13,17 +13,15 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
+
+import com.maxmind.geoip2.record.Country;
 
 import org.eclipsefoundation.geoip.client.helper.InetAddressHelper;
 import org.eclipsefoundation.geoip.client.model.Error;
 import org.eclipsefoundation.geoip.client.service.GeoIPService;
-
-import com.maxmind.geoip2.record.Country;
 
 /**
  * @author martin
@@ -35,8 +33,6 @@ public class CountryResource {
 
 	@Inject
 	GeoIPService geoIp;
-	@Context
-	UriInfo uriInfo;
 
 	@GET
 	@Path("/{ipAddr}")

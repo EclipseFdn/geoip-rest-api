@@ -19,6 +19,8 @@ import org.eclipsefoundation.geoip.client.service.GeoIPService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.quarkus.runtime.Startup;
+
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CityResponse;
@@ -33,6 +35,7 @@ import com.maxmind.geoip2.record.Country;
  * 
  * @author Martin Lowe
  */
+@Startup
 @ApplicationScoped
 public class MaxMindGeoIPService implements GeoIPService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MaxMindGeoIPService.class);
