@@ -1,7 +1,0 @@
-*
-!target/*-runner
-!target/*-runner.jar
-!target/lib/*
-!bin/
-!maxmind/
-!reflection-config.json

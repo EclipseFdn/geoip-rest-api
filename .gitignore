@@ -55,4 +55,5 @@ pom.xml.versionsBackup
 release.properties
 
 # MaxMind data store
+maxmind/
 data/

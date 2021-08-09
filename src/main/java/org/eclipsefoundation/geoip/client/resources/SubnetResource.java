@@ -11,10 +11,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 import org.eclipsefoundation.geoip.client.model.IPVersion;
 import org.eclipsefoundation.geoip.client.service.NetworkService;
@@ -31,9 +29,6 @@ public class SubnetResource {
 
 	@Inject
 	NetworkService networks;
-
-	@Context
-	UriInfo uriInfo;
 
 	@GET
 	@Path("/{ipv: (ipv[46])}/{isoLocale: ([a-zA-Z]{2})}")
