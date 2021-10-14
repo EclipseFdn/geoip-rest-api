@@ -1,5 +1,12 @@
 # Eclipse Foundation Marketplace Client API
 
+---
+**NOTE**
+
+This project was migrated to [Eclipse Gitlab](https://gitlab.eclipse.org/eclipsefdn/it/api/geoip-rest-api) on October 14, 2021.
+
+---
+
 ## Summary
 
 TODO!!
