@@ -1,0 +1,19 @@
+{
+  "name": "eclipsefdn-geoip-rest-api-support",
+  "version": "1.0.0",
+  "dependencies": {
+    "@redocly/openapi-cli": "^1.0.0-beta.54",
+    "@openapi-contrib/openapi-schema-to-json-schema": "^3.1.1",
+    "@stoplight/json-ref-resolver": "^3.1.2",
+    "decamelize": "^5.0.0",
+    "js-yaml": "^4.1.0",
+    "yargs": "^17.0.1"
+  },
+  "private": true,
+  "scripts": {
+    "start": "npm run generate-json-schema && npx @redocly/openapi-cli preview-docs spec/openapi.yaml -p 8093",
+    "test": "npm run generate-json-schema && npx @redocly/openapi-cli lint spec/openapi.yaml",
+    "generate-json-schema": "npm run clean && node src/main/js/openapi2schema.js -s spec/openapi.yaml -t src/test/resources",
+    "clean": "rm -rf src/test/resources/schemas/"
+  }
+}

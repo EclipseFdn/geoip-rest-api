@@ -1,18 +1,16 @@
-# Contributing to geo-rest-api
+# Contributing to geoip-rest-api
 
 Thanks for your interest in this project.
 
 ## Project description
 
-geo-rest-api is a project to regroup assets for the Eclipse Foundation look and feel. 
-
-* https://github.com/eclipsefdn/geo-rest-api
+* https://gitlab.eclipse.org/eclipsefdn/it/api/geoip-rest-api
 
 ## Developer resources
 
 The project maintains the following source code repositories
 
-* https://github.com/eclipsefdn/geo-rest-api
+* https://gitlab.eclipse.org/eclipsefdn/it/api/geoip-rest-api
 
 ## Eclipse Contributor Agreement
 

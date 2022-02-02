@@ -2,20 +2,13 @@ clean:;
 	rm -rf ./maxmind
 	mvn clean
 install: clean;
+	npm ci 
 	sh ./bin/maxmind.sh maxmind/
 package: install;
-	mvn package
-	docker build -f src/main/docker/Dockerfile.jvm --no-cache -t eclipsefdn/geoip-local:latest . 
+	mvn compile package -Declipse.maxmind.root=${PWD}/maxmind
 dirty-package:;
-	mvn package
-	docker build -f src/main/docker/Dockerfile.jvm --no-cache -t eclipsefdn/geoip-local:latest . 
-package-native: install;
-	mvn package -Pnative -Dnative-image.docker-build=true
-	docker build -f src/main/docker/Dockerfile.native --no-cache -t eclipsefdn/geoip-local-native:latest . 
-dirty-package-native:;
-	mvn package -Pnative -Dnative-image.docker-build=true
-	docker build -f src/main/docker/Dockerfile.native --no-cache -t eclipsefdn/geoip-local-native:latest . 
+	mvn compile package -Declipse.maxmind.root=${PWD}/maxmind
 headless-docker: package;
-	docker run -i --rm -p 8080:8080 eclipsefdn/geoip-local:latest
-headless-docker-native: package-native;
-	docker run -i --rm -p 8080:8080 eclipsefdn/geoip-local-native:latest
+	docker-compose down
+	docker-compose build
+	docker-compose up -d

@@ -57,3 +57,8 @@ release.properties
 # MaxMind data store
 maxmind/
 data/
+
+# Build resources
+.env
+src/test/resources/schemas
+node_modules

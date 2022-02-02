@@ -10,11 +10,7 @@
       CONTAINER_NAME = 'app'
       ENVIRONMENT = sh(
         script: """
-          if [ "${env.BRANCH_NAME}" = "master" ]; then
-            printf "production"
-          else
             printf "${env.BRANCH_NAME}"
-          fi
         """,
         returnStdout: true
       )

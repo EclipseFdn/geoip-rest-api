@@ -19,8 +19,8 @@ import javax.ws.rs.core.Response.Status;
 
 import com.maxmind.geoip2.record.Country;
 
+import org.eclipsefoundation.core.model.Error;
 import org.eclipsefoundation.geoip.client.helper.InetAddressHelper;
-import org.eclipsefoundation.geoip.client.model.Error;
 import org.eclipsefoundation.geoip.client.service.GeoIPService;
 
 /**
